@@ -68,7 +68,7 @@ class IMethodUnit: public Unit {};
 class CsharpMethodUnit: public IMethodUnit {
 public: enum Modifier {
   STATIC = 1,
-    CONST = 1 << 1,
+  //  CONST = 1 << 1,
     VIRTUAL = 1 << 2
 };
 public: CsharpMethodUnit(const std::string & name,
@@ -88,9 +88,6 @@ std::string compile(unsigned int level = 0) const {
   }
   result += m_returnType + " ";
   result += m_name + "()";
-  if (m_flags & CONST) {
-    result += " const";
-  }
   result += " {\n";
   for (const auto & b: m_body) {
     result += b -> compile(level + 1);
@@ -102,11 +99,16 @@ private: std::string m_name;
 std::string m_returnType;
 Flags m_flags;
 std::vector < std::shared_ptr < Unit > > m_body;};
+
 class CsharpClassUnit: public IClassUnit {
 public: enum AccessModifier {
   PUBLIC,
   PROTECTED,
-  PRIVATE
+  PRIVATE,
+  PRIVATE_PROTECTED,
+  FILE,
+  INTERNAL,
+  PROTECTED_INTERNAL
 };
 static
 const std::vector < std::string > ACCESS_MODIFIERS;
@@ -143,7 +145,7 @@ using Fields = std::vector < std::shared_ptr < Unit > > ;
 std::vector < Fields > m_fields;
 };
 const std::vector< std::string > CsharpClassUnit::ACCESS_MODIFIERS = { "public",
-"protected", "private" };
+"protected", "private","private protected","file","internal","protected internal"};
 
 class JavaMethodUnit:public IMethodUnit { public: enum Modifier {
         STATIC = 1,
@@ -330,7 +332,7 @@ class CFabric: public Fabric {
 };
 class CsharpFabric: public Fabric {
     IClassUnit* createClass()override{
-    return new CsharpClassUnit("kek");
+    return new CsharpClassUnit("myClass");
     }
     IMethodUnit* createMethod() override{
         return new CsharpMethodUnit("foo","void",CsharpMethodUnit::STATIC);
