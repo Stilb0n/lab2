@@ -60,12 +60,16 @@ class PrintOperatorUnit: public Unit {
 
 
 
-class IMethodUnit: public Unit {};
+class IMethodUnit: public Unit {    public:
+      std::string static name1;
+      std::string vozvr1 = 0;
+      int Num1 = 0;};
 
  class IClassUnit: public Unit {};
 
 
 class CsharpMethodUnit: public IMethodUnit {
+
 public: enum Modifier {
   STATIC = 1,
   //  CONST = 1 << 1,
@@ -76,6 +80,14 @@ public: CsharpMethodUnit(const std::string & name,
   flags): m_name(name),
 m_returnType(returnType),
 m_flags(flags) {}
+    CsharpMethodUnit(const CsharpMethodUnit & obj)
+    {
+    this->m_returnType=obj.m_returnType;
+    this->m_flags=obj.m_flags;
+    this->m_name=obj.m_name;
+    this->m_body=obj.m_body;
+    this->name1 = obj.name1;
+    }
 void add(const std::shared_ptr < Unit > & unit, Flags /* flags */ = 0) {
   m_body.push_back(unit);
 }
@@ -227,6 +239,10 @@ const std::vector< std::string > JavaClassUnit::ACCESS_MODIFIERS = { "public",
 "protected", "private" };
 
 class CMethodUnit:public IMethodUnit {
+public:
+std::string name1 =0;
+std::string vozvr1 = 0;
+int Num1 = 0;
 public: enum Modifier {
   STATIC = 1,
     CONST = 1 << 1,
@@ -310,38 +326,53 @@ const std::vector< std::string > CClassUnit::ACCESS_MODIFIERS = { "public",
 
 class Fabric{
 public:
-    virtual IClassUnit* createClass()=0;
-    virtual IMethodUnit* createMethod()=0;
+      virtual IClassUnit* createClass(std::string name)=0;
+    virtual IMethodUnit* createMethod(std::string name, std::string vozvr, int Num)=0;
 };
 
 class JavaFabric: public Fabric {
-    IClassUnit* createClass()override{
-    return new JavaClassUnit("kek");
+    IClassUnit* createClass(std::string name)override{
+    return new JavaClassUnit(name);
     }
-    IMethodUnit* createMethod() override{
-        return new JavaMethodUnit("foo","void",CsharpMethodUnit::STATIC);
+    IMethodUnit* createMethod(std::string name, std::string vozvr, int Num) override{
+        return new JavaMethodUnit(name,vozvr,Num);
         }
 };
 class CFabric: public Fabric {
-    IClassUnit* createClass()override{
-    return new CClassUnit("kek");
+    IClassUnit* createClass(std::string name)override{
+    return new CClassUnit(name);
     }
-    IMethodUnit* createMethod() override{
-        return new CMethodUnit("foo","void",CsharpMethodUnit::STATIC);
+    IMethodUnit* createMethod(std::string name, std::string vozvr, int Num) override{
+        return new CMethodUnit(name,vozvr,Num);
         }
 };
 class CsharpFabric: public Fabric {
-    IClassUnit* createClass()override{
-    return new CsharpClassUnit("myClass");
+    public: IClassUnit* createClass(std::string name)override{
+    return new CsharpClassUnit(name);
     }
-    IMethodUnit* createMethod() override{
-        return new CsharpMethodUnit("foo","void",CsharpMethodUnit::STATIC);
+
+    IMethodUnit* createMethod(std::string name, std::string vozvr, int Num) override{
+;
+  //  IMethodUnit::name1 = name;
+   //  vozvr1 = vozvr;
+//Num1 = Num;
+        return new CsharpMethodUnit(name,vozvr,Num);
         }
 
 };
 
+std::string generateProgram2(Fabric* fabric) {
+        IClassUnit* classA = fabric->createClass("kek");
+        IMethodUnit * alo = (fabric->createMethod("testFunc1", "void", 5));
+
+        // IMethodUnit* methodA = fabric->createMethod("testFunc1", "void", 5);
+      // std::shared_ptr <IMethodUnit> allal = std::make_shared<CsharpMethodUnit>(fabric->createMethod("testFunc1", "void", 5));
+     //   std::shared_ptr <IMethodUnit> allal;
 
 
+
+        return classA->compile();
+}
 
 
 
