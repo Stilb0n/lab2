@@ -19,8 +19,12 @@ protected: virtual std::string generateShift(unsigned int level) const {
         return result;
     }
 };
-class IPrintOperatorUnit : public Unit {
-public: virtual   std::string compile(unsigned int level = 0)const  =0;
+class IPrintOperatorUnit : public Unit
+{
+
+public:
+    virtual  void add(Unit * dd , Flags) = 0;
+  virtual   std::string compile(unsigned int level = 0)const  =0;
 //    virtual       std::string generateShift(unsigned int level)const =0;
 };
 
@@ -28,7 +32,7 @@ class CsharpPrintOperatorUnit : public IPrintOperatorUnit {
 public:
 
     explicit CsharpPrintOperatorUnit(const std::string &text) : m_text(text) {}
-//    void add(Unit * dd , Flags)override {std::cout<<"YaEstGroot";}
+    void add(Unit * dd , Flags)override {std::cout<<"YaEstGroot";}
     std::string compile(unsigned int level = 0) const override {
         return generateShift( level ) + "Console.WriteLine(\"" + m_text + "\" );\n";
     }
@@ -351,18 +355,20 @@ class Fabric {
 public:
     virtual IClassUnit* createClass(std::string name) = 0;
     virtual IMethodUnit* createMethod(std::string name, std::string vozvr,int Num) = 0;
-    virtual IPrintOperatorUnit*     createPrint2( std::string text)=0;
+    virtual IPrintOperatorUnit* createPrint2( std::string text)=0;
 };
 
 class CFabric: public Fabric {
 
-    public: IClassUnit* createClass(std::string name)override
+    public:
+    IClassUnit* createClass(std::string name)override
     {return new CClassUnit(name);}
-    IMethodUnit* createMethod(std::string name, std::string vozvr, int Num) override {
-    IMethodUnit* CMethodUnitPTR = new CMethodUnit(name,vozvr, Num);
-    return CMethodUnitPTR;
-    }
-   IPrintOperatorUnit*  createPrint2 ( std::string  text)override  {return new CPrintOperatorUnit(text);}
+    IMethodUnit* createMethod(std::string name, std::string vozvr, int Num) override
+         {
+         IMethodUnit* CMethodUnitPTR = new CMethodUnit(name,vozvr, Num);
+         return CMethodUnitPTR;
+          }
+  //!!!!!!!  IPrintOperatorUnit*  createPrint2 ( std::string  text)override  {return new CPrintOperatorUnit(text);}
 };
 class JavaFabric: public Fabric {
 
