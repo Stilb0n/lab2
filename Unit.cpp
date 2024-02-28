@@ -8,6 +8,7 @@ public: using Flags = unsigned int;
     virtual void add(Unit * dd, Flags) {
         throw std::runtime_error("Not supported");
     }
+    virtual   std::string createPrint( );
     virtual std::string compile(unsigned int level = 0) const = 0;
 protected: virtual std::string generateShift(unsigned int level) const {
         static
@@ -19,13 +20,9 @@ protected: virtual std::string generateShift(unsigned int level) const {
         return result;
     }
 };
-class IPrintOperatorUnit : public Unit
-{
+class IPrintOperatorUnit : public Unit {
+public: virtual   std::string createPrint( )=0;
 
-public:
-    virtual  void add(Unit * dd , Flags) = 0;
-  virtual   std::string compile(unsigned int level = 0)const  =0;
-//    virtual       std::string generateShift(unsigned int level)const =0;
 };
 
 class CsharpPrintOperatorUnit : public IPrintOperatorUnit {
@@ -34,10 +31,12 @@ public:
     explicit CsharpPrintOperatorUnit(const std::string &text) : m_text(text) {}
     void add(Unit * dd , Flags)override {std::cout<<"YaEstGroot";}
     std::string compile(unsigned int level = 0) const override {
-        return generateShift( level ) + "Console.WriteLine(\"" + m_text + "\" );\n";
+        return " " ;
     }
-//    std::string generateShift(unsigned int level) const override {    return "Compiled code: " + m_text;}
-
+    std::string generateShift(unsigned int level) const override {    return "Compiled code: " + m_text;}
+    std::string createPrint( )override  {
+        return "Console.WriteLine(\"" + m_text + "\");\n";
+    }
 
 private:
     std::string m_text;
@@ -91,7 +90,7 @@ public: CsharpMethodUnit( std::string  name,
         }
         result += " {\n";
         for (const auto & b: m_body) {
-            result += b -> compile(level + 1);
+            result += b -> compile(level + 1) +b->createPrint();
         }
         result += generateShift(level) + "}\n";
         return result;
@@ -380,7 +379,7 @@ class JavaFabric: public Fabric {
 
         return JavaMethodUnitPTR;
     }
-    IPrintOperatorUnit*  createPrint2 ( std::string  text)override  {return new CPrintOperatorUnit(text);}
+    IPrintOperatorUnit*  createPrint2 ( std::string  text)override  {return new CsharpPrintOperatorUnit(text);}
 };
 
 class CsharpFabric : public Fabric {
