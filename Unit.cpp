@@ -8,7 +8,7 @@ public: using Flags = unsigned int;
     virtual void add(Unit * dd, Flags) {
         throw std::runtime_error("Not supported");
     }
-    virtual   std::string createPrint( );
+  //  virtual   std::string createPrint( );
     virtual std::string compile(unsigned int level = 0) const = 0;
 protected: virtual std::string generateShift(unsigned int level) const {
         static
@@ -20,27 +20,7 @@ protected: virtual std::string generateShift(unsigned int level) const {
         return result;
     }
 };
-class IPrintOperatorUnit : public Unit {
-public: virtual   std::string createPrint( )=0;
 
-};
-
-class CsharpPrintOperatorUnit : public IPrintOperatorUnit {
-public:
-
-    explicit CsharpPrintOperatorUnit(const std::string &text) : m_text(text) {}
-    void add(Unit * dd , Flags)override {std::cout<<"YaEstGroot";}
-    std::string compile(unsigned int level = 0) const override {
-        return " " ;
-    }
-    std::string generateShift(unsigned int level) const override {    return "Compiled code: " + m_text;}
-    std::string createPrint( )override  {
-        return "Console.WriteLine(\"" + m_text + "\");\n";
-    }
-
-private:
-    std::string m_text;
-};
 class IMethodUnit : public Unit {
 public: enum Modifier {
         STATIC = 1,
@@ -90,7 +70,7 @@ public: CsharpMethodUnit( std::string  name,
         }
         result += " {\n";
         for (const auto & b: m_body) {
-            result += b -> compile(level + 1) +b->createPrint();
+            result += b -> compile(level + 1);
         }
         result += generateShift(level) + "}\n";
         return result;
@@ -350,6 +330,36 @@ private: std::string m_name;
 };
 const std::vector< std::string > CsharpClassUnit::ACCESS_MODIFIERS = { "public",
                                                                     "protected", "private","private protected","internal","protected internal"};
+
+
+class IPrintOperatorUnit : public Unit {
+public: virtual   std::string createPrint( )=0;
+
+};
+
+class CsharpPrintOperatorUnit : public IPrintOperatorUnit {
+public:
+
+    explicit CsharpPrintOperatorUnit(const std::string &text) : m_text(text) {}
+    void add(Unit * dd , Flags)override {std::cout<<"YaEstGroot";}
+    std::string compile(unsigned int level = 0) const override {
+        return "Console.WriteLine(\"" + m_text + "\");\n";
+    }
+    std::string generateShift(unsigned int level) const override {    return "Compiled code: " + m_text;}
+    std::string createPrint( )override  {
+        return "Console.WriteLine(\"" + m_text + "\");\n";
+    }
+
+private:
+    std::string m_text;
+};
+
+
+
+
+
+
+
 class Fabric {
 public:
     virtual IClassUnit* createClass(std::string name) = 0;
@@ -367,7 +377,7 @@ class CFabric: public Fabric {
          IMethodUnit* CMethodUnitPTR = new CMethodUnit(name,vozvr, Num);
          return CMethodUnitPTR;
           }
-  //!!!!!!!  IPrintOperatorUnit*  createPrint2 ( std::string  text)override  {return new CPrintOperatorUnit(text);}
+   IPrintOperatorUnit*  createPrint2 ( std::string  text)override  {return new CsharpPrintOperatorUnit(text);}
 };
 class JavaFabric: public Fabric {
 
@@ -379,7 +389,7 @@ class JavaFabric: public Fabric {
 
         return JavaMethodUnitPTR;
     }
-    IPrintOperatorUnit*  createPrint2 ( std::string  text)override  {return new CsharpPrintOperatorUnit(text);}
+ IPrintOperatorUnit*  createPrint2 ( std::string  text)override  {return new CsharpPrintOperatorUnit(text);}
 };
 
 class CsharpFabric : public Fabric {
@@ -391,13 +401,13 @@ class CsharpFabric : public Fabric {
         IMethodUnit* CsharpMethodUnitPTR = new CsharpMethodUnit(name,vozvr, Num);
         return CsharpMethodUnitPTR;
     }
-    IPrintOperatorUnit*  createPrint2 ( std::string  text)override  {return (new CsharpPrintOperatorUnit(text));}
+ IPrintOperatorUnit*  createPrint2 ( std::string  text)override  {return new CsharpPrintOperatorUnit(text);}
 };
 
 //->createPrint(text)
 std::string generateProgram2(Fabric* fabric) {
      try {
-    IClassUnit* classA = fabric->createClass("kek");
+    IClassUnit* classA = fabric->createClass("keek");
     IMethodUnit* methodB = fabric->createMethod("testFunc1", "void", 0);
     IPrintOperatorUnit* printA = fabric->createPrint2("fa123");
     std::string a = methodB->compile();
@@ -413,9 +423,9 @@ std::string generateProgram2(Fabric* fabric) {
 
     auto method = fabric->createMethod("testFunc4", "void", 1);
   //  PrintOperatorUnit rofl("fff");
-    IPrintOperatorUnit* lolkek = printA;
+      IPrintOperatorUnit* lolkek = printA;
 
-    method->add( lolkek,1);
+      method->add( lolkek,1);
     classA->add(method,2);
     return classA->compile();
      }
