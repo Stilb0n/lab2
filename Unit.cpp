@@ -5,7 +5,7 @@ class Unit {
 public: using Flags = unsigned int;
     virtual~Unit() =
         default;
-    virtual void add(Unit * dd, Flags) {
+    virtual void add(Unit * , Flags) {
         throw std::runtime_error("Not supported");
     }
   //  virtual   std::string createPrint( );
@@ -35,7 +35,7 @@ public:
     int Num = 0;
 
 };
-class IClassUnit : public Unit { public: virtual void add(IMethodUnit* unit, Flags flags) = 0; };
+class IClassUnit : public Unit { public: virtual void add(Unit* unit, Flags flags) = 0; };
 class CsharpMethodUnit : public IMethodUnit {
 
 public: CsharpMethodUnit( std::string  name,
@@ -99,7 +99,7 @@ public: CMethodUnit( std::string  name,
     void add( Unit * dd , Flags)override {
         m_body.push_back(dd);
     };
-    std::string compile(unsigned int level = 0) const {
+    std::string compile(unsigned int level = 0) const override {
         std::string result = generateShift(level);
         if (m_flags & STATIC) {
             result += "static ";
@@ -197,7 +197,7 @@ public: explicit CClassUnit(const std::string & name): m_name(name) {
             }
         }
     }
-    void add ( IMethodUnit *  method, Flags flags) override{
+    void add ( Unit *  method, Flags flags) override{
         int AccessModifier = PRIVATE;
         if (flags < ACCESS_MODIFIERSC.size()) {
             AccessModifier = flags;
@@ -247,7 +247,7 @@ public: explicit JavaClassUnit(const std::string & name): m_name(name) {
             }
         }
     }
-    void add ( IMethodUnit *  method, Flags flags) override{
+    void add ( Unit *  method, Flags flags) override{
         int AccessModifier = PRIVATE;
         if (flags < ACCESS_MODIFIERS.size()) {
             AccessModifier = flags;
@@ -263,8 +263,9 @@ public: explicit JavaClassUnit(const std::string & name): m_name(name) {
             if (m_fields[i].empty()) {
                 continue;
             }
-            result += ACCESS_MODIFIERS[i] + ":\n";
+
             for (const auto & f: m_fields[i]) {
+                result += ACCESS_MODIFIERS[i];
                 result += f -> compile(level + 1);
             }
             result += "\n";
@@ -300,7 +301,7 @@ public: explicit CsharpClassUnit(const std::string & name): m_name(name) {
             }
         }
     }
-    void add ( IMethodUnit *  method, Flags flags) override{
+    void add ( Unit *  method, Flags flags) override{
         int AccessModifier = PRIVATE;
         if (flags < ACCESS_MODIFIERS.size()) {
             AccessModifier = flags;
@@ -333,31 +334,55 @@ const std::vector< std::string > CsharpClassUnit::ACCESS_MODIFIERS = { "public",
 
 
 class IPrintOperatorUnit : public Unit {
-public: virtual   std::string createPrint( )=0;
-
+//public: virtual   std::string createPrint( )=0;
+public: virtual   std::string compile(unsigned int level = 0) const=0;
 };
 
 class CsharpPrintOperatorUnit : public IPrintOperatorUnit {
 public:
 
     explicit CsharpPrintOperatorUnit(const std::string &text) : m_text(text) {}
-    void add(Unit * dd , Flags)override {std::cout<<"YaEstGroot";}
+ //   void add(Unit * dd , Flags)override {std::cout<<"YaEstGroot";}
     std::string compile(unsigned int level = 0) const override {
-        return "Console.WriteLine(\"" + m_text + "\");\n";
+        return generateShift( level ) + "Console.WriteLine(\"" + m_text + "\");\n";
     }
-    std::string generateShift(unsigned int level) const override {    return "Compiled code: " + m_text;}
-    std::string createPrint( )override  {
-        return "Console.WriteLine(\"" + m_text + "\");\n";
-    }
+   // std::string generateShift(unsigned int level) const override {    return "Compiled code: " + m_text;}
+
 
 private:
     std::string m_text;
 };
 
 
+class CPrintOperatorUnit : public IPrintOperatorUnit {
+public:
+
+    explicit CPrintOperatorUnit(const std::string &text) : m_text(text) {}
+    //   void add(Unit * dd , Flags)override {std::cout<<"YaEstGroot";}
+    std::string compile(unsigned int level = 0) const override {
+        return generateShift( level ) + "printf( \"" + m_text + "\" );\n";
+    }
+    // std::string generateShift(unsigned int level) const override {    return "Compiled code: " + m_text;}
 
 
+private:
+    std::string m_text;
+};
 
+class JavaPrintOperatorUnit : public IPrintOperatorUnit {
+public:
+
+    explicit JavaPrintOperatorUnit(const std::string &text) : m_text(text) {}
+    //   void add(Unit * dd , Flags)override {std::cout<<"YaEstGroot";}
+    std::string compile(unsigned int level = 0) const override {
+        return generateShift( level ) + "System.out.println( \"" + m_text + "\" );\n";
+    }
+    // std::string generateShift(unsigned int level) const override {    return "Compiled code: " + m_text;}
+
+
+private:
+    std::string m_text;
+};
 
 
 class Fabric {
@@ -377,7 +402,7 @@ class CFabric: public Fabric {
          IMethodUnit* CMethodUnitPTR = new CMethodUnit(name,vozvr, Num);
          return CMethodUnitPTR;
           }
-   IPrintOperatorUnit*  createPrint2 ( std::string  text)override  {return new CsharpPrintOperatorUnit(text);}
+   IPrintOperatorUnit*  createPrint2 ( std::string  text)override  {return new CPrintOperatorUnit(text);}
 };
 class JavaFabric: public Fabric {
 
@@ -389,7 +414,7 @@ class JavaFabric: public Fabric {
 
         return JavaMethodUnitPTR;
     }
- IPrintOperatorUnit*  createPrint2 ( std::string  text)override  {return new CsharpPrintOperatorUnit(text);}
+ IPrintOperatorUnit*  createPrint2 ( std::string  text)override  {return new JavaPrintOperatorUnit(text);}
 };
 
 class CsharpFabric : public Fabric {
@@ -406,7 +431,7 @@ class CsharpFabric : public Fabric {
 
 //->createPrint(text)
 std::string generateProgram2(Fabric* fabric) {
-     try {
+   //  try {
     IClassUnit* classA = fabric->createClass("keek");
     IMethodUnit* methodB = fabric->createMethod("testFunc1", "void", 0);
     IPrintOperatorUnit* printA = fabric->createPrint2("fa123");
@@ -423,11 +448,13 @@ std::string generateProgram2(Fabric* fabric) {
 
     auto method = fabric->createMethod("testFunc4", "void", 1);
   //  PrintOperatorUnit rofl("fff");
-      IPrintOperatorUnit* lolkek = printA;
+      IPrintOperatorUnit* PrintOperatorA = printA;
 
-      method->add( lolkek,1);
+      method->add( PrintOperatorA,1);
     classA->add(method,2);
     return classA->compile();
-     }
-         catch(const char* ex){std::cout<<ex<<std::endl;}
+ //    }
+  //       catch(const char* ex){std::cout<<ex<<std::endl;
+ //   return 0;}
+
 }
