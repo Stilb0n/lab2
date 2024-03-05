@@ -16,7 +16,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         Unit.cpp \
-        lol.cpp \
         main.cpp
 
 # Default rules for deployment.
